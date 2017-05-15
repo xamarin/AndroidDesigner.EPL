@@ -134,7 +134,7 @@ public class ProjectResources extends ResourceRepository {
                             // already a map for this type. add the resources from the
                             // library, this will override existing value, which is why
                             // we loop in a specific library order.
-                            tempMap.putAll(libEntry.getValue());
+                            safeResourceValueMapPutAll(libEntry.getValue(), tempMap);
                         }
                     }
                 }
@@ -152,7 +152,7 @@ public class ProjectResources extends ResourceRepository {
             if (typeMap == null) {
                 resultMap.put(type, toCaseInsensitiveMap (entry.getValue()));
             } else {
-                typeMap.putAll(entry.getValue());
+                safeResourceValueMapPutAll(entry.getValue(), typeMap);
             }
         }
 
@@ -166,12 +166,16 @@ public class ProjectResources extends ResourceRepository {
             rvmCtor.setAccessible (true);
             Map<String, ResourceValue> m = new TreeMap<String,ResourceValue> (String.CASE_INSENSITIVE_ORDER);
             ResourceValueMap newMap = rvmCtor.newInstance (m, Sets.newHashSetWithExpectedSize (map.size ()));
-            for (Map.Entry<String, ResourceValue> kvp : map.entrySet ())
-                newMap.put (kvp.getKey (), kvp.getValue ());
+            safeResourceValueMapPutAll(map, newMap);
             return newMap;
         } catch (Exception e) {
             return map;
         }
+    }
+
+    static void safeResourceValueMapPutAll (ResourceValueMap oldMap, ResourceValueMap newMap) {
+        for (Map.Entry<String, ResourceValue> kvp : oldMap.entrySet ())
+            newMap.put (kvp.getKey (), kvp.getValue ());
     }
 
     /**
